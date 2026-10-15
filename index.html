@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java-Based Online Quiz Platform</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-body: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+            --card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+        .card-custom:hover {
+            box-shadow: var(--card-hover);
+        }
+        .stat-card {
+            border-left: 4px solid var(--primary);
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--primary);
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation & Role Switcher Bar -->
+<header class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-2 px-3 px-lg-4">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="#" onclick="showSection('participant-dashboard')">
+            <i class="bi bi-filetype-java text-warning fs-3"></i>
+            <span class="fw-bold">Java Brains <span class="badge bg-primary text-white fs-6 fw-normal">QuizPlatform</span></span>
+        </a>
+
+        <!-- Live Role Switcher -->
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <span class="text-white-50 small d-none d-md-inline">Active Mode:</span>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-light active" id="btn-role-participant" onclick="switchRole('PARTICIPANT')">
+                    <i class="bi bi-mortarboard-fill me-1 text-success"></i> Participant
+                </button>
+                <button type="button" class="btn btn-outline-light" id="btn-role-creator" onclick="switchRole('CREATOR')">
+                    <i class="bi bi-pencil-square me-1 text-info"></i> Quiz Creator
+                </button>
+                <button type="button" class="btn btn-outline-light" id="btn-role-admin" onclick="switchRole('ADMIN')">
+                    <i class="bi bi-shield-lock-fill me-1 text-danger"></i> Admin
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Role Sub-Navigations -->
+<div class="bg-white border-bottom shadow-sm">
+    <div class="container-fluid px-lg-4 py-2">
+        <!-- Participant Menu -->
+        <ul class="nav nav-pills gap-1" id="nav-participant">
+            <li class="nav-item">
+                <a class="nav-link active py-1 px-3" href="#" onclick="showSection('participant-dashboard')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('participant-quizzes')"><i class="bi bi-play-circle me-1"></i> Take Quizzes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('participant-history')"><i class="bi bi-clock-history me-1"></i> Participation History</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('participant-leaderboard')"><i class="bi bi-trophy me-1"></i> Leaderboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('participant-reminders')"><i class="bi bi-alarm me-1"></i> Reminders</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('participant-interactions')"><i class="bi bi-chat-left-text me-1"></i> Ask Creator</a>
+            </li>
+        </ul>
+
+        <!-- Creator Menu -->
+        <ul class="nav nav-pills gap-1 d-none" id="nav-creator">
+            <li class="nav-item">
+                <a class="nav-link active py-1 px-3" href="#" onclick="showSection('creator-dashboard')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('creator-create-quiz')"><i class="bi bi-plus-circle me-1"></i> Create Quiz</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('creator-history')"><i class="bi bi-journals me-1"></i> Quiz History</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('creator-results')"><i class="bi bi-award me-1"></i> Quiz Results & Grading</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('creator-interactions')"><i class="bi bi-chat-dots me-1"></i> Participant Interactions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('creator-performance')"><i class="bi bi-graph-up me-1"></i> Performance Overview</a>
+            </li>
+        </ul>
+
+        <!-- Admin Menu -->
+        <ul class="nav nav-pills gap-1 d-none" id="nav-admin">
+            <li class="nav-item">
+                <a class="nav-link active py-1 px-3" href="#" onclick="showSection('admin-dashboard')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('admin-users')"><i class="bi bi-people me-1"></i> User Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('admin-quizzes')"><i class="bi bi-journal-check me-1"></i> Quiz Content Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('admin-reports')"><i class="bi bi-bar-chart-line me-1"></i> Performance Reports</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('admin-settings')"><i class="bi bi-gear me-1"></i> System Settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 px-3" href="#" onclick="showSection('admin-alerts')"><i class="bi bi-bell me-1"></i> System Alerts</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Main App Body -->
+<main class="container-fluid px-lg-4 py-4 flex-grow-1">
+    <!-- Global Alert Notification Banner -->
+    <div id="system-alert-banner" class="alert alert-info alert-dismissible fade show d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill fs-5 text-primary"></i>
+            <div>
+                <strong id="system-alert-title">Platform Live: Java Assessments Ready!</strong>
+                <span class="small ms-2" id="system-alert-msg">Test your Java programming skills, review question explanations, and track your ranking.</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Feedback Toast/Message Alert -->
+    <div id="action-feedback" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span id="action-feedback-text">Action completed successfully!</span>
+        <button type="button" class="btn-close" onclick="document.getElementById('action-feedback').classList.add('d-none')"></button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. PARTICIPANT SECTIONS                    -->
+    <!-- ========================================== -->
+
+    <!-- Section: Participant Dashboard -->
+    <div id="section-participant-dashboard" class="app-section">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-mortarboard-fill text-success me-2"></i>Participant Learning Hub</h2>
+                <p class="text-muted mb-0">Logged in as: <strong id="current-user-name">John Doe (Student)</strong></p>
+            </div>
+            <button class="btn btn-primary" onclick="showSection('participant-quizzes')">
+                <i class="bi bi-play-circle me-1"></i> Browse Java Quizzes
+            </button>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3">
+                    <div class="text-muted small text-uppercase fw-semibold">Quizzes Taken</div>
+                    <h3 class="fw-bold my-1 text-primary" id="dash-participant-attempts">2</h3>
+                    <a href="#" onclick="showSection('participant-history')" class="small text-decoration-none">Participation History &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #10b981;">
+                    <div class="text-muted small text-uppercase fw-semibold">Passed Quizzes</div>
+                    <h3 class="fw-bold my-1 text-success" id="dash-participant-passed">2</h3>
+                    <span class="small text-muted">100% Pass Rate</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #8b5cf6;">
+                    <div class="text-muted small text-uppercase fw-semibold">Average Accuracy</div>
+                    <h3 class="fw-bold my-1" style="color: #8b5cf6;" id="dash-participant-avg">80%</h3>
+                    <span class="small text-muted">Across all evaluations</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #f59e0b;">
+                    <div class="text-muted small text-uppercase fw-semibold">Leaderboard Rank</div>
+                    <h3 class="fw-bold my-1 text-warning" id="dash-participant-rank">#2</h3>
+                    <a href="#" onclick="showSection('participant-leaderboard')" class="small text-decoration-none text-warning">View Standings &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="card card-custom p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent Quiz Results</h5>
+                        <a href="#" onclick="showSection('participant-history')" class="btn btn-sm btn-outline-secondary">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Quiz Title</th>
+                                    <th>Score</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Report</th>
+                                </tr>
+                            </thead>
+                            <tbody id="participant-dashboard-recent-table">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card card-custom p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-alarm-fill text-danger me-2"></i>Study Reminders</h5>
+                        <a href="#" onclick="showSection('participant-reminders')" class="btn btn-sm btn-outline-secondary">Manage</a>
+                    </div>
+                    <div id="participant-dashboard-reminders-list" class="list-group list-group-flush small">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Approved Quizzes Grid -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-patch-check-fill text-success me-2"></i>Approved Java Assessments Ready to Take</h5>
+            <div class="row g-3" id="participant-dashboard-quizzes-grid">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Take Quizzes Catalog -->
+    <div id="section-participant-quizzes" class="app-section d-none">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-play-circle-fill text-primary me-2"></i>Take Timed Java Quizzes</h2>
+                <p class="text-muted small">Select an assessment to start your timed evaluation session</p>
+            </div>
+        </div>
+        <div class="row g-4" id="participant-quizzes-catalog">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Section: Live Timed Quiz Interface -->
+    <div id="section-participant-taking-quiz" class="app-section d-none">
+        <div class="card card-custom border-primary p-3 mb-4 sticky-top bg-white shadow">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary" id="taking-quiz-category">Core Java</span>
+                    <h4 class="fw-bold mb-0 mt-1" id="taking-quiz-title">Java Fundamentals</h4>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="text-end">
+                        <div class="small text-muted text-uppercase fw-semibold">Time Remaining</div>
+                        <div id="quiz-live-timer" class="fs-3 fw-bold font-monospace text-danger">10:00</div>
+                    </div>
+                    <button class="btn btn-success px-4" onclick="finishAndSubmitQuiz()">
+                        <i class="bi bi-send-check me-1"></i> Submit Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8" id="taking-quiz-questions-container">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-custom p-4 sticky-top" style="top: 110px;">
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-grid-3x3-gap-fill me-1"></i> Question Navigator</h6>
+                    <div class="d-flex flex-wrap gap-2 mb-4" id="taking-quiz-palette">
+                        <!-- Palette buttons -->
+                    </div>
+                    <div class="p-3 bg-light rounded small mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-success" style="width: 16px; height: 16px;"> </span>
+                            <span>Answered</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-outline-secondary border" style="width: 16px; height: 16px;"> </span>
+                            <span>Not Answered</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success w-100" onclick="finishAndSubmitQuiz()">
+                        <i class="bi bi-check2-circle me-1"></i> Submit & Finish Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Performance Report -->
+    <div id="section-participant-report" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-file-earmark-bar-graph-fill text-primary me-2"></i>Performance Report</h2>
+                <p class="text-muted small">Detailed question-by-question review with answers and explanations</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print Report</button>
+                <button class="btn btn-primary" onclick="showSection('participant-quizzes')">Take Another Quiz</button>
+            </div>
+        </div>
+
+        <div class="card card-custom p-4 mb-4" id="report-summary-box">
+            <!-- Populated dynamically -->
+        </div>
+
+        <h4 class="fw-bold mb-3"><i class="bi bi-list-check text-primary me-2"></i>Question-by-Question Solution Analysis</h4>
+        <div id="report-questions-breakdown" class="d-flex flex-column gap-3 mb-4">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Section: Participation History -->
+    <div id="section-participant-history" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-clock-history text-primary me-2"></i>Quiz Participation History</h2>
+        <p class="text-muted small mb-4">Log of all your past Java assessments, scores, and instructor evaluations</p>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Attempt #</th>
+                            <th>Quiz Title</th>
+                            <th>Category</th>
+                            <th>Score & %</th>
+                            <th>Status</th>
+                            <th>Date Taken</th>
+                            <th>Instructor Feedback</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participant-history-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Participant Reminders -->
+    <div id="section-participant-reminders" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-alarm-fill text-danger me-2"></i>Quiz Study Reminders</h2>
+                <p class="text-muted small">Set practice targets and review schedules for upcoming assessments</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add-reminder">
+                <i class="bi bi-plus-circle me-1"></i> Schedule Reminder
+            </button>
+        </div>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Status</th>
+                            <th>Target Quiz</th>
+                            <th>Scheduled Date & Time</th>
+                            <th>Preparation Notes</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participant-reminders-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Leaderboard -->
+    <div id="section-participant-leaderboard" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-trophy-fill text-warning me-2"></i>Platform Leaderboard & Rankings</h2>
+        <p class="text-muted small mb-4">Live rankings based on total points earned across all Java quizzes</p>
+
+        <!-- Personal Standing Card -->
+        <div class="card card-custom text-white p-4 mb-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-semibold">Your Personal Standing</span>
+                    <h3 class="fw-bold mb-1">John Doe</h3>
+                    <p class="opacity-75 mb-0 small">Keep completing quizzes with high accuracy to advance your rank!</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="d-inline-block bg-white text-dark rounded-4 p-3 shadow text-center" style="min-width: 140px;">
+                        <div class="text-muted small text-uppercase fw-semibold">Current Rank</div>
+                        <div class="display-6 fw-bold text-primary">#2</div>
+                        <div class="small fw-semibold text-secondary">8 Points Earned</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th style="width: 80px;">Rank</th>
+                            <th>Participant</th>
+                            <th>Quizzes Completed</th>
+                            <th>Total Points Earned</th>
+                            <th>Average Accuracy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-table-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Participant Interactions (Ask Creator) -->
+    <div id="section-participant-interactions" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-chat-left-text-fill text-info me-2"></i>Communications with Quiz Creators</h2>
+                <p class="text-muted small">Ask doubts directly to instructors and review their replies</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-send-message">
+                <i class="bi bi-envelope-plus me-1"></i> Send Doubt to Creator
+            </button>
+        </div>
+        <div id="participant-messages-list" class="d-flex flex-column gap-3">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 2. QUIZ CREATOR SECTIONS                   -->
+    <!-- ========================================== -->
+
+    <!-- Section: Creator Dashboard -->
+    <div id="section-creator-dashboard" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-person-workspace text-info me-2"></i>Quiz Creator Studio</h2>
+                <p class="text-muted mb-0">Logged in as: <strong>Prof. Alan Gosling (Instructor)</strong></p>
+            </div>
+            <button class="btn btn-primary" onclick="showSection('creator-create-quiz')">
+                <i class="bi bi-plus-circle me-1"></i> Create New Quiz
+            </button>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3">
+                    <div class="text-muted small text-uppercase fw-semibold">My Authored Quizzes</div>
+                    <h3 class="fw-bold my-1 text-primary" id="creator-dash-quizzes">4</h3>
+                    <a href="#" onclick="showSection('creator-history')" class="small text-decoration-none">Quiz History &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #10b981;">
+                    <div class="text-muted small text-uppercase fw-semibold">Approved & Active</div>
+                    <h3 class="fw-bold my-1 text-success" id="creator-dash-approved">3</h3>
+                    <span class="small text-muted">Published for students</span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #8b5cf6;">
+                    <div class="text-muted small text-uppercase fw-semibold">Student Submissions</div>
+                    <h3 class="fw-bold my-1" style="color: #8b5cf6;" id="creator-dash-attempts">6</h3>
+                    <a href="#" onclick="showSection('creator-results')" class="small text-decoration-none">Grade Submissions &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #f59e0b;">
+                    <div class="text-muted small text-uppercase fw-semibold">Average Student Score</div>
+                    <h3 class="fw-bold my-1 text-warning">83.3%</h3>
+                    <a href="#" onclick="showSection('creator-performance')" class="small text-decoration-none text-warning">Analytics Overview &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-journals text-primary me-2"></i>My Authored Quizzes</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Quiz Title</th>
+                            <th>Category</th>
+                            <th>Duration</th>
+                            <th>Questions</th>
+                            <th>Approval Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creator-dashboard-quizzes-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Create Quiz Form -->
+    <div id="section-creator-create-quiz" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-patch-question-fill text-primary me-2"></i>Create New Java Quiz</h2>
+        <p class="text-muted small mb-4">Design timed quizzes with multiple-choice options, correct answers, and explanations</p>
+
+        <form id="form-create-quiz" onsubmit="handleCreateQuiz(event)">
+            <div class="card card-custom p-4 mb-4">
+                <h5 class="fw-bold text-primary mb-3">1. Quiz Details & Settings</h5>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold small">Quiz Title</label>
+                        <input type="text" class="form-control" id="new-quiz-title" placeholder="e.g. Java Design Patterns & Best Practices" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Category / Topic</label>
+                        <select class="form-select" id="new-quiz-category">
+                            <option value="Core Java">Core Java</option>
+                            <option value="OOP">OOP Concepts</option>
+                            <option value="Collections">Collections Framework</option>
+                            <option value="Multithreading">Multithreading & Concurrency</option>
+                            <option value="Streams & Lambdas">Streams & Lambdas</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small">Description</label>
+                        <textarea class="form-control" id="new-quiz-desc" rows="2" placeholder="Summary of topics covered..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Duration (Minutes)</label>
+                        <input type="number" class="form-control" id="new-quiz-duration" value="15" min="1" max="180" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Passing Score Percentage (%)</label>
+                        <input type="number" class="form-control" id="new-quiz-pass" value="60" min="1" max="100" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-primary mb-0">2. Questions & Answer Key</h5>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addQuestionInputBlock()">
+                    <i class="bi bi-plus-lg me-1"></i> Add Another Question
+                </button>
+            </div>
+
+            <div id="creator-questions-builder-container" class="d-flex flex-column gap-3 mb-4">
+                <!-- Dynamically generated question inputs -->
+            </div>
+
+            <div class="card card-custom p-3 d-flex flex-row justify-content-between align-items-center">
+                <span class="text-muted small">Submitted quizzes will enter <strong>Pending Approval</strong> state for Admin review.</span>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="showSection('creator-dashboard')">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Submit Quiz for Approval
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Section: Creator Quiz History -->
+    <div id="section-creator-history" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-clock-history text-primary me-2"></i>Authored Quizzes History</h2>
+        <p class="text-muted small mb-4">Log of all created, published, pending, and rejected assessments</p>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>ID</th>
+                            <th>Quiz Title</th>
+                            <th>Category</th>
+                            <th>Duration</th>
+                            <th>Pass %</th>
+                            <th>Questions</th>
+                            <th>Approval Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creator-history-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Creator Quiz Results & Grading -->
+    <div id="section-creator-results" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-award-fill text-warning me-2"></i>Participant Quiz Submissions & Grading</h2>
+        <p class="text-muted small mb-4">Review student answers and submit personalized instructor feedback</p>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Attempt ID</th>
+                            <th>Participant</th>
+                            <th>Quiz Title</th>
+                            <th>Score & %</th>
+                            <th>Status</th>
+                            <th>Instructor Feedback</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creator-submissions-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Creator Interactions (Reply) -->
+    <div id="section-creator-interactions" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-chat-dots-fill text-info me-2"></i>Participant Interactions & Doubts</h2>
+        <p class="text-muted small mb-4">Panel for viewing questions sent by participants and replying with mentoring guidance</p>
+        <div id="creator-messages-list" class="d-flex flex-column gap-3">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Section: Creator Performance Overview -->
+    <div id="section-creator-performance" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-graph-up text-primary me-2"></i>Authored Content Performance Overview</h2>
+        <p class="text-muted small mb-4">Summary metrics and evaluation statistics for your Java quizzes</p>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card card-custom stat-card p-3">
+                    <div class="text-muted small text-uppercase fw-semibold">Total Submissions</div>
+                    <h3 class="fw-bold my-1 text-primary">6 Attempts</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #10b981;">
+                    <div class="text-muted small text-uppercase fw-semibold">Pass Rate</div>
+                    <h3 class="fw-bold my-1 text-success">83.3%</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #f59e0b;">
+                    <div class="text-muted small text-uppercase fw-semibold">Average Student Score</div>
+                    <h3 class="fw-bold my-1 text-warning">83.3%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 3. ADMIN SECTIONS                          -->
+    <!-- ========================================== -->
+
+    <!-- Section: Admin Dashboard -->
+    <div id="section-admin-dashboard" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill text-danger me-2"></i>Administrator Console</h2>
+                <p class="text-muted mb-0">System administration, user roles, quiz approvals, and platform alerts</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" onclick="showSection('admin-users')"><i class="bi bi-people me-1"></i> Users</button>
+                <button class="btn btn-primary" onclick="showSection('admin-quizzes')"><i class="bi bi-journal-check me-1"></i> Quiz Approvals</button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3">
+                    <div class="text-muted small text-uppercase fw-semibold">Total Users</div>
+                    <h3 class="fw-bold my-1 text-primary" id="admin-dash-total-users">7</h3>
+                    <a href="#" onclick="showSection('admin-users')" class="small text-decoration-none">Manage Users &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #f59e0b;">
+                    <div class="text-muted small text-uppercase fw-semibold">Pending Quizzes</div>
+                    <h3 class="fw-bold my-1 text-warning" id="admin-dash-pending-quizzes">1</h3>
+                    <a href="#" onclick="showSection('admin-quizzes')" class="small text-decoration-none text-warning">Review & Approve &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #10b981;">
+                    <div class="text-muted small text-uppercase fw-semibold">Platform Pass Rate</div>
+                    <h3 class="fw-bold my-1 text-success">83.3%</h3>
+                    <a href="#" onclick="showSection('admin-reports')" class="small text-decoration-none text-success">View Reports &rarr;</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-custom stat-card p-3" style="border-left-color: #ef4444;">
+                    <div class="text-muted small text-uppercase fw-semibold">Active Alerts</div>
+                    <h3 class="fw-bold my-1 text-danger" id="admin-dash-alerts-count">2</h3>
+                    <a href="#" onclick="showSection('admin-alerts')" class="small text-decoration-none text-danger">Broadcast Alerts &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card card-custom p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-warning"><i class="bi bi-check2-circle me-1"></i>Quizzes Awaiting Content Approval</h5>
+                        <a href="#" onclick="showSection('admin-quizzes')" class="btn btn-sm btn-outline-secondary">Manage</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Quiz Title</th>
+                                    <th>Category</th>
+                                    <th>Creator</th>
+                                    <th class="text-end">Quick Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-dashboard-pending-table">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card card-custom p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-1"></i>User Accounts</h5>
+                        <a href="#" onclick="showSection('admin-users')" class="btn btn-sm btn-outline-secondary">Manage</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-dashboard-users-preview">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Admin User Management -->
+    <div id="section-admin-users" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-people-fill text-primary me-2"></i>User Management</h2>
+                <p class="text-muted small">Manage accounts, assign roles, activate/deactivate, and delete users</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add-user">
+                <i class="bi bi-person-plus-fill me-1"></i> Add New User
+            </button>
+        </div>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email Address</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Admin Quiz Content Management -->
+    <div id="section-admin-quizzes" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-journal-check text-primary me-2"></i>Quiz Content Management</h2>
+                <p class="text-muted small">Approve or reject Java quizzes submitted by Quiz Creators</p>
+            </div>
+        </div>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>ID</th>
+                            <th>Quiz Title</th>
+                            <th>Creator</th>
+                            <th>Duration</th>
+                            <th>Passing %</th>
+                            <th>Approval Status</th>
+                            <th class="text-end">Decision Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-quizzes-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Admin System Settings -->
+    <div id="section-admin-settings" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-gear-fill text-primary me-2"></i>System Settings Management</h2>
+        <p class="text-muted small mb-4">Configure system-wide defaults and administrative parameters</p>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card card-custom p-4">
+                    <form onsubmit="handleSaveSettings(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Platform Name</label>
+                            <input type="text" class="form-control" id="setting-site-name" value="Java Brains Quiz Platform">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Default Quiz Duration (Minutes)</label>
+                            <input type="number" class="form-control" id="setting-default-duration" value="15">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Global Passing Threshold (%)</label>
+                            <input type="number" class="form-control" id="setting-pass-pct" value="60">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Allow Public Registration</label>
+                            <select class="form-select" id="setting-allow-reg">
+                                <option value="true" selected>Enabled</option>
+                                <option value="false">Disabled</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small">Platform Support Email</label>
+                            <input type="email" class="form-control" id="setting-support-email" value="support@quizplatform.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Configuration</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Admin Performance Reports -->
+    <div id="section-admin-reports" class="app-section d-none">
+        <h2 class="fw-bold mb-1"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Platform Performance Reports</h2>
+        <p class="text-muted small mb-4">Graphical performance statistics, pass rates, and candidate analytics</p>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-success me-2"></i>Pass vs. Fail Distribution</h5>
+                    <div class="p-3 bg-light rounded text-center">
+                        <div class="d-flex justify-content-center align-items-center gap-4 my-3">
+                            <div>
+                                <h3 class="text-success fw-bold mb-0">83.3%</h3>
+                                <span class="small text-muted">Passed (5 Attempts)</span>
+                            </div>
+                            <div class="border-start ps-4">
+                                <h3 class="text-danger fw-bold mb-0">16.7%</h3>
+                                <span class="small text-muted">Failed (1 Attempt)</span>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div class="progress-bar bg-success" style="width: 83.3%;"></div>
+                            <div class="progress-bar bg-danger" style="width: 16.7%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-diagram-3 text-primary me-2"></i>Available Topics Breakdown</h5>
+                    <div class="d-flex flex-column gap-2">
+                        <div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Core Java & Syntax</span>
+                                <strong>5 Questions</strong>
+                            </div>
+                            <div class="progress" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 100%;"></div></div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Object-Oriented Programming (OOP)</span>
+                                <strong>5 Questions</strong>
+                            </div>
+                            <div class="progress" style="height: 8px;"><div class="progress-bar bg-info" style="width: 100%;"></div></div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Collections Framework</span>
+                                <strong>4 Questions</strong>
+                            </div>
+                            <div class="progress" style="height: 8px;"><div class="progress-bar bg-warning" style="width: 80%;"></div></div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Multithreading & Concurrency</span>
+                                <strong>4 Questions</strong>
+                            </div>
+                            <div class="progress" style="height: 8px;"><div class="progress-bar bg-danger" style="width: 80%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Admin System Alerts -->
+    <div id="section-admin-alerts" class="app-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0"><i class="bi bi-bell-fill text-danger me-2"></i>System Alerts & Notifications</h2>
+                <p class="text-muted small">Broadcast notices, maintenance downtime alerts, and platform announcements</p>
+            </div>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-add-alert">
+                <i class="bi bi-megaphone me-1"></i> Broadcast New Alert
+            </button>
+        </div>
+        <div class="card card-custom p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Alert Headline</th>
+                            <th>Message</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-alerts-table">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modals -->
+<!-- Modal: Add User -->
+<div class="modal fade" id="modal-add-user" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="handleAddUser(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add Platform User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Full Name</label>
+                        <input type="text" class="form-control" id="new-user-name" placeholder="e.g. David Warner" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Email Address</label>
+                        <input type="email" class="form-control" id="new-user-email" placeholder="david@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Role</label>
+                        <select class="form-select" id="new-user-role">
+                            <option value="ROLE_PARTICIPANT">Participant</option>
+                            <option value="ROLE_CREATOR">Quiz Creator</option>
+                            <option value="ROLE_ADMIN">Administrator</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Schedule Reminder -->
+<div class="modal fade" id="modal-add-reminder" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="handleAddReminder(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Schedule Quiz Reminder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Target Quiz Title</label>
+                        <select class="form-select" id="new-reminder-quiz">
+                            <option value="Java Fundamentals & Core Syntax">Java Fundamentals & Core Syntax</option>
+                            <option value="Object-Oriented Programming (OOP) in Java">Object-Oriented Programming (OOP) in Java</option>
+                            <option value="Java Collections Framework & Generics">Java Collections Framework & Generics</option>
+                            <option value="Java Multithreading & Concurrency">Java Multithreading & Concurrency</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="new-reminder-dt" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Notes / Objectives</label>
+                        <textarea class="form-control" id="new-reminder-notes" rows="2" placeholder="e.g. Focus on memory model and wait/notify..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Reminder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Send Message to Creator -->
+<div class="modal fade" id="modal-send-message" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="handleSendMessage(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Send Doubt to Quiz Creator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Subject</label>
+                        <input type="text" class="form-control" id="msg-subject" placeholder="e.g. Query regarding OOP Polymorphism Question #2" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Question / Inquiry Details</label>
+                        <textarea class="form-control" id="msg-body" rows="4" placeholder="Type your doubt here..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Broadcast Alert -->
+<div class="modal fade" id="modal-add-alert" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="handleAddAlert(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger">Broadcast System Alert</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Title</label>
+                        <input type="text" class="form-control" id="new-alert-title" placeholder="e.g. Scheduled Maintenance" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Message</label>
+                        <textarea class="form-control" id="new-alert-msg" rows="3" placeholder="Enter message..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Severity</label>
+                        <select class="form-select" id="new-alert-sev">
+                            <option value="INFO">INFO</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Broadcast</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Instructor Feedback on Attempt -->
+<div class="modal fade" id="modal-feedback" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="handleSaveFeedback(event)">
+                <input type="hidden" id="feedback-attempt-id">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Instructor Feedback & Grading</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted" id="feedback-student-info">Student submission evaluation</p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Personalized Feedback & Recommendations</label>
+                        <textarea class="form-control" id="feedback-text" rows="4" placeholder="Enter feedback for student..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer class="footer py-3 bg-white border-top mt-auto text-center text-muted small">
+    <div class="container">
+        &copy; 2024 GUVI Geek Network Pvt. Ltd. All rights reserved. Java-Based Online Quiz Platform.
+    </div>
+</footer>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Platform Core Engine Script -->
+<script>
+    // Initial State Database (Seed Data)
+    const DEFAULT_DATA = {
+        users: [
+            { id: 1, name: "System Administrator", email: "admin@quizplatform.com", role: "ROLE_ADMIN", enabled: true },
+            { id: 2, name: "Prof. Alan Gosling", email: "creator@quizplatform.com", role: "ROLE_CREATOR", enabled: true },
+            { id: 3, name: "Dr. James Blocher", email: "james@quizplatform.com", role: "ROLE_CREATOR", enabled: true },
+            { id: 4, name: "John Doe", email: "participant@quizplatform.com", role: "ROLE_PARTICIPANT", enabled: true },
+            { id: 5, name: "Alice Walker", email: "alice@student.com", role: "ROLE_PARTICIPANT", enabled: true },
+            { id: 6, name: "Bob Smith", email: "bob@student.com", role: "ROLE_PARTICIPANT", enabled: true },
+            { id: 7, name: "Carol Danvers", email: "carol@student.com", role: "ROLE_PARTICIPANT", enabled: true }
+        ],
+        quizzes: [
+            {
+                id: 1,
+                title: "Java Fundamentals & Core Syntax",
+                category: "Core Java",
+                duration: 10,
+                passingPercentage: 60,
+                status: "APPROVED",
+                creator: "Prof. Alan Gosling",
+                questions: [
+                    {
+                        id: 101,
+                        text: "What is the default value of a boolean variable in Java when declared as an instance member?",
+                        optionA: "true", optionB: "false", optionC: "null", optionD: "0",
+                        correct: "B",
+                        explanation: "Instance boolean variables in Java default to 'false'."
+                    },
+                    {
+                        id: 102,
+                        text: "Which of the following is true regarding Java's parameter passing mechanism?",
+                        optionA: "Primitives are passed by reference, objects by value",
+                        optionB: "Java is strictly pass-by-value for all types; for objects, the reference address is copied by value",
+                        optionC: "Objects are passed by reference, primitives by value",
+                        optionD: "Both primitives and objects are passed strictly by reference",
+                        correct: "B",
+                        explanation: "Java is strictly pass-by-value. When an object is passed, a copy of the reference address is passed."
+                    },
+                    {
+                        id: 103,
+                        text: "Which memory area in the JVM holds local variables and partial results of method execution?",
+                        optionA: "Heap Area", optionB: "Metaspace", optionC: "JVM Stack", optionD: "Program Counter Register",
+                        correct: "C",
+                        explanation: "Each thread in Java has a private JVM Stack storing activation frames with local variables."
+                    },
+                    {
+                        id: 104,
+                        text: "Why are String objects immutable in Java?",
+                        optionA: "Security, String Pool caching, thread safety, and HashCode caching",
+                        optionB: "To prevent memory leaks",
+                        optionC: "Because strings cannot exceed 256 characters",
+                        optionD: "Java does not support mutable sequences",
+                        correct: "A",
+                        explanation: "String immutability is fundamental for String Constant Pool caching, thread safety, and secure network connections."
+                    },
+                    {
+                        id: 105,
+                        text: "What is the evaluated output of: System.out.println(10 + 20 + \"Java\" + 10 + 20);",
+                        optionA: "30Java30", optionB: "1020Java1020", optionC: "30Java1020", optionD: "Compilation Error",
+                        correct: "C",
+                        explanation: "Operations execute left to right: 10 + 20 = 30. Then 30 + 'Java' = '30Java'. Then string concatenation gives '30Java1020'."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Object-Oriented Programming (OOP) in Java",
+                category: "OOP",
+                duration: 15,
+                passingPercentage: 70,
+                status: "APPROVED",
+                creator: "Prof. Alan Gosling",
+                questions: [
+                    {
+                        id: 201,
+                        text: "Which OOP concept is demonstrated when a subclass provides a specific implementation of a method defined in its parent class?",
+                        optionA: "Method Overloading", optionB: "Method Overriding", optionC: "Data Hiding", optionD: "Cohesion",
+                        correct: "B",
+                        explanation: "Method Overriding occurs when a subclass defines an instance method matching the superclass signature."
+                    },
+                    {
+                        id: 202,
+                        text: "Can an abstract class have constructors in Java?",
+                        optionA: "No, abstract classes cannot have constructors",
+                        optionB: "Yes, and they are invoked via super() during subclass instantiation",
+                        optionC: "Only if the constructor is private",
+                        optionD: "Only default empty constructors are permitted",
+                        correct: "B",
+                        explanation: "Abstract classes have constructors to initialize abstract class state via super()."
+                    },
+                    {
+                        id: 203,
+                        text: "Which keyword prevents a class from being inherited/subclassed in Java?",
+                        optionA: "static", optionB: "abstract", optionC: "final", optionD: "sealed only",
+                        correct: "C",
+                        explanation: "A class declared as final cannot be subclassed."
+                    },
+                    {
+                        id: 204,
+                        text: "What relationship is described by Composition in Java?",
+                        optionA: "IS-A inheritance",
+                        optionB: "HAS-A ownership where component lifecycle is tied to the owner",
+                        optionC: "Loose USES-A dependency",
+                        optionD: "Polymorphic dispatch",
+                        correct: "B",
+                        explanation: "Composition represents a strong HAS-A relationship."
+                    },
+                    {
+                        id: 205,
+                        text: "Since Java 8, can interfaces contain method implementations?",
+                        optionA: "No, only abstract method signatures are allowed",
+                        optionB: "Yes, using default and static methods",
+                        optionC: "Only private methods are allowed",
+                        optionD: "Only with @FunctionalInterface",
+                        correct: "B",
+                        explanation: "Default and static methods allow interfaces to declare method implementations."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Java Collections Framework & Generics",
+                category: "Collections",
+                duration: 12,
+                passingPercentage: 65,
+                status: "APPROVED",
+                creator: "Dr. James Blocher",
+                questions: [
+                    {
+                        id: 301,
+                        text: "How does HashMap handle collision when bucket entries exceed TREEIFY_THRESHOLD (8) and capacity >= 64?",
+                        optionA: "Throws ConcurrentModificationException",
+                        optionB: "Discards oldest entries",
+                        optionC: "Converts the linked list into a balanced Red-Black Tree",
+                        optionD: "Switches to an array",
+                        correct: "C",
+                        explanation: "Buckets with 8+ elements transform to Red-Black Trees (TreeNode) for O(log n) efficiency."
+                    },
+                    {
+                        id: 302,
+                        text: "Which Collection maintains elements in natural sorted ascending order?",
+                        optionA: "HashSet", optionB: "LinkedHashSet", optionC: "TreeSet", optionD: "Vector",
+                        correct: "C",
+                        explanation: "TreeSet is backed by a TreeMap and keeps elements sorted."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Java Multithreading & Concurrency",
+                category: "Multithreading",
+                duration: 15,
+                passingPercentage: 65,
+                status: "APPROVED",
+                creator: "Prof. Alan Gosling",
+                questions: [
+                    {
+                        id: 401,
+                        text: "What guarantee does the 'volatile' keyword provide in Java?",
+                        optionA: "Atomicity of compound operations (e.g. i++)",
+                        optionB: "Visibility: writes are immediately visible across CPU caches and establishes happens-before ordering",
+                        optionC: "Deadlock prevention",
+                        optionD: "Acquires an intrinsic monitor lock",
+                        correct: "B",
+                        explanation: "Volatile guarantees cache coherence visibility and memory ordering."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Java 8+ Streams & Functional Interfaces",
+                category: "Streams & Lambdas",
+                duration: 12,
+                passingPercentage: 60,
+                status: "PENDING_APPROVAL",
+                creator: "Dr. James Blocher",
+                questions: [
+                    {
+                        id: 501,
+                        text: "What is the difference between map() and flatMap() in Java Streams?",
+                        optionA: "map() applies to primitives, flatMap() to Objects",
+                        optionB: "map() transforms 1 to 1; flatMap() flattens nested streams into a single composite stream",
+                        optionC: "map is terminal, flatMap is intermediate",
+                        optionD: "No difference",
+                        correct: "B",
+                        explanation: "flatMap flattens Stream of Streams into a single flat Stream."
+                    }
+                ]
+            }
+        ],
+        attempts: [
+            {
+                id: 1,
+                quizId: 1,
+                quizTitle: "Java Fundamentals & Core Syntax",
+                category: "Core Java",
+                participantId: 4,
+                participantName: "John Doe",
+                score: 4,
+                totalScore: 5,
+                percentage: 80.0,
+                passed: true,
+                timeSpent: "4 min 12 sec",
+                date: "2026-10-14 11:20",
+                instructorFeedback: "Great performance on core syntax! Review JVM Stack vs Heap details.",
+                answers: [
+                    { qId: 101, selected: "B", correct: "B", isCorrect: true },
+                    { qId: 102, selected: "B", correct: "B", isCorrect: true },
+                    { qId: 103, selected: "A", correct: "C", isCorrect: false },
+                    { qId: 104, selected: "A", correct: "A", isCorrect: true },
+                    { qId: 105, selected: "C", correct: "C", isCorrect: true }
+                ]
+            },
+            {
+                id: 2,
+                quizId: 2,
+                quizTitle: "Object-Oriented Programming (OOP) in Java",
+                category: "OOP",
+                participantId: 4,
+                participantName: "John Doe",
+                score: 4,
+                totalScore: 5,
+                percentage: 80.0,
+                passed: true,
+                timeSpent: "6 min 45 sec",
+                date: "2026-10-15 09:15",
+                instructorFeedback: "Solid grasp of Java OOP principles and interfaces.",
+                answers: [
+                    { qId: 201, selected: "B", correct: "B", isCorrect: true },
+                    { qId: 202, selected: "B", correct: "B", isCorrect: true },
+                    { qId: 203, selected: "C", correct: "C", isCorrect: true },
+                    { qId: 204, selected: "B", correct: "B", isCorrect: true },
+                    { qId: 205, selected: "A", correct: "B", isCorrect: false }
+                ]
+            },
+            {
+                id: 3,
+                quizId: 1,
+                quizTitle: "Java Fundamentals & Core Syntax",
+                category: "Core Java",
+                participantId: 5,
+                participantName: "Alice Walker",
+                score: 5,
+                totalScore: 5,
+                percentage: 100.0,
+                passed: true,
+                timeSpent: "3 min 30 sec",
+                date: "2026-10-14 14:00",
+                instructorFeedback: "Flawless score! Exceptional understanding.",
+                answers: []
+            }
+        ],
+        reminders: [
+            { id: 1, quizTitle: "Java Multithreading & Concurrency", dateTime: "2026-10-17 18:00", notes: "Revise volatile, synchronized blocks, and executor thread pools.", completed: false },
+            { id: 2, quizTitle: "Java Collections Framework & Generics", dateTime: "2026-10-18 10:30", notes: "Practice Comparator vs Comparable code snippets.", completed: true }
+        ],
+        messages: [
+            {
+                id: 1,
+                subject: "Query regarding JVM Stack vs Heap Question #3",
+                message: "Hello Prof. Alan, could you explain why local variables in a method reside in the JVM stack even if they reference objects?",
+                reply: "Hi John! In Java, the reference variable itself is allocated on the thread's stack frame, while the object instance it points to is allocated on the shared Heap.",
+                sender: "John Doe",
+                recipient: "Prof. Alan Gosling",
+                status: "REPLIED",
+                date: "2026-10-14 16:30"
+            }
+        ],
+        alerts: [
+            { id: 1, title: "Welcome to Java Brains Quiz Platform", message: "Explore comprehensive Java programming quizzes, live timers, and instant performance analysis.", severity: "INFO", active: true },
+            { id: 2, title: "Scheduled Server Maintenance", message: "Routine database optimization will take place on Sunday at 02:00 AM UTC.", severity: "WARNING", active: true }
+        ]
+    };
+
+    // Load or initialize state in localStorage
+    function loadDB() {
+        const saved = localStorage.getItem('QUIZ_PLATFORM_DB');
+        if (!saved) {
+            saveDB(DEFAULT_DATA);
+            return DEFAULT_DATA;
+        }
+        return JSON.parse(saved);
+    }
+    function saveDB(data) {
+        localStorage.setItem('QUIZ_PLATFORM_DB', JSON.stringify(data));
+    }
+
+    let DB = loadDB();
+    let currentRole = 'PARTICIPANT'; // 'PARTICIPANT', 'CREATOR', 'ADMIN'
+    let activeQuizSession = null;
+    let quizTimerInterval = null;
+
+    // Toast feedback helper
+    function showFeedback(msg) {
+        const fb = document.getElementById('action-feedback');
+        document.getElementById('action-feedback-text').innerText = msg;
+        fb.classList.remove('d-none');
+        setTimeout(() => fb.classList.add('d-none'), 3500);
+    }
+
+    // Role switching
+    function switchRole(role) {
+        currentRole = role;
+        document.getElementById('btn-role-participant').classList.toggle('active', role === 'PARTICIPANT');
+        document.getElementById('btn-role-creator').classList.toggle('active', role === 'CREATOR');
+        document.getElementById('btn-role-admin').classList.toggle('active', role === 'ADMIN');
+
+        document.getElementById('nav-participant').classList.toggle('d-none', role !== 'PARTICIPANT');
+        document.getElementById('nav-creator').classList.toggle('d-none', role !== 'CREATOR');
+        document.getElementById('nav-admin').classList.toggle('d-none', role !== 'ADMIN');
+
+        if (role === 'PARTICIPANT') showSection('participant-dashboard');
+        else if (role === 'CREATOR') showSection('creator-dashboard');
+        else if (role === 'ADMIN') showSection('admin-dashboard');
+    }
+
+    // Navigation sections
+    function showSection(sectionId) {
+        document.querySelectorAll('.app-section').forEach(el => el.classList.add('d-none'));
+        const target = document.getElementById('section-' + sectionId);
+        if (target) {
+            target.classList.remove('d-none');
+        }
+
+        // Highlight active sub-nav pill
+        document.querySelectorAll('.nav-pills .nav-link').forEach(link => {
+            if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(sectionId)) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Trigger dynamic renders
+        renderCurrentView(sectionId);
+    }
+
+    function renderCurrentView(sec) {
+        DB = loadDB();
+        if (sec === 'participant-dashboard' || sec === 'participant-quizzes') renderParticipantQuizzes();
+        if (sec === 'participant-history') renderParticipantHistory();
+        if (sec === 'participant-reminders') renderReminders();
+        if (sec === 'participant-leaderboard') renderLeaderboard();
+        if (sec === 'participant-interactions') renderParticipantMessages();
+
+        if (sec === 'creator-dashboard' || sec === 'creator-history') renderCreatorQuizzes();
+        if (sec === 'creator-results') renderCreatorSubmissions();
+        if (sec === 'creator-interactions') renderCreatorMessages();
+
+        if (sec === 'admin-dashboard' || sec === 'admin-quizzes') renderAdminQuizzes();
+        if (sec === 'admin-users') renderAdminUsers();
+        if (sec === 'admin-alerts') renderAdminAlerts();
+    }
+
+    // --- PARTICIPANT FUNCTIONS ---
+    function renderParticipantQuizzes() {
+        const approved = DB.quizzes.filter(q => q.status === 'APPROVED');
+        const grid = document.getElementById('participant-quizzes-catalog');
+        const dashGrid = document.getElementById('participant-dashboard-quizzes-grid');
+
+        const html = approved.map(q => `
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-custom h-100 p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary-subtle text-primary">${q.category}</span>
+                        <span class="small text-muted"><i class="bi bi-clock me-1"></i>${q.duration} min</span>
+                    </div>
+                    <h5 class="fw-bold mb-2">${q.title}</h5>
+                    <p class="text-muted small flex-grow-1">${q.questions.length} Questions | Passing Threshold: <strong class="text-success">${q.passingPercentage}%</strong></p>
+                    <button class="btn btn-primary w-100 mt-3" onclick="startQuizSession(${q.id})">
+                        <i class="bi bi-stopwatch me-1"></i> Start Timed Quiz
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        if (grid) grid.innerHTML = html;
+        if (dashGrid) dashGrid.innerHTML = html;
+
+        // Render participant recent table on dashboard
+        const recentTable = document.getElementById('participant-dashboard-recent-table');
+        if (recentTable) {
+            recentTable.innerHTML = DB.attempts.map(a => `
+                <tr>
+                    <td><strong>${a.quizTitle}</strong></td>
+                    <td class="fw-bold ${a.passed ? 'text-success' : 'text-danger'}">${a.score}/${a.totalScore} (${a.percentage}%)</td>
+                    <td><span class="badge ${a.passed ? 'bg-success' : 'bg-danger'}">${a.passed ? 'PASSED' : 'FAILED'}</span></td>
+                    <td class="text-muted">${a.date}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewAttemptReport(${a.id})"><i class="bi bi-file-earmark-text"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render dashboard reminders preview
+        const remPreview = document.getElementById('participant-dashboard-reminders-list');
+        if (remPreview) {
+            remPreview.innerHTML = DB.reminders.map(r => `
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <div>
+                        <div class="fw-semibold ${r.completed ? 'text-decoration-line-through text-muted' : ''}">${r.quizTitle}</div>
+                        <div class="text-muted small">${r.dateTime}</div>
+                    </div>
+                    <button class="btn btn-sm ${r.completed ? 'btn-success' : 'btn-outline-secondary'}" onclick="toggleReminder(${r.id})">
+                        <i class="bi bi-check2"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+    }
+
+    function startQuizSession(quizId) {
+        const quiz = DB.quizzes.find(q => q.id === quizId);
+        if (!quiz) return;
+
+        activeQuizSession = {
+            quiz: quiz,
+            answers: {},
+            totalSeconds: quiz.duration * 60,
+            remainingSeconds: quiz.duration * 60
+        };
+
+        document.getElementById('taking-quiz-title').innerText = quiz.title;
+        document.getElementById('taking-quiz-category').innerText = quiz.category;
+
+        // Render Questions
+        const qContainer = document.getElementById('taking-quiz-questions-container');
+        qContainer.innerHTML = quiz.questions.map((q, idx) => `
+            <div class="card card-custom p-4 mb-4" id="quiz-card-${idx}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary px-3 py-2">Question ${idx + 1} of ${quiz.questions.length}</span>
+                    <span class="badge bg-light text-muted border">1 pt</span>
+                </div>
+                <h5 class="fw-semibold code-font mb-4">${q.text}</h5>
+                <div class="d-flex flex-column gap-2 mb-3">
+                    ${['A', 'B', 'C', 'D'].map(opt => `
+                        <label class="p-3 rounded border d-flex align-items-center gap-3 cursor-pointer">
+                            <input class="form-check-input mt-0 fs-5" type="radio" name="opt_q_${q.id}" value="${opt}" onchange="selectQuizOption(${q.id}, '${opt}', ${idx})">
+                            <div><strong class="me-2">${opt}.</strong> ${q['option' + opt]}</div>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        // Render Palette
+        const palette = document.getElementById('taking-quiz-palette');
+        palette.innerHTML = quiz.questions.map((q, idx) => `
+            <button type="button" class="btn btn-outline-secondary" id="palette-btn-${idx}" style="width: 42px; height: 42px; font-weight: bold;" onclick="document.getElementById('quiz-card-${idx}').scrollIntoView({behavior: 'smooth'})">
+                ${idx + 1}
+            </button>
+        `).join('');
+
+        // Start Timer
+        clearInterval(quizTimerInterval);
+        updateTimerDisplay();
+        quizTimerInterval = setInterval(() => {
+            activeQuizSession.remainingSeconds--;
+            updateTimerDisplay();
+            if (activeQuizSession.remainingSeconds <= 0) {
+                clearInterval(quizTimerInterval);
+                alert("Time has expired! Submitting your quiz now.");
+                finishAndSubmitQuiz();
+            }
+        }, 1000);
+
+        showSection('participant-taking-quiz');
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(activeQuizSession.remainingSeconds / 60);
+        const secs = activeQuizSession.remainingSeconds % 60;
+        document.getElementById('quiz-live-timer').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function selectQuizOption(qId, option, index) {
+        activeQuizSession.answers[qId] = option;
+        const btn = document.getElementById('palette-btn-' + index);
+        if (btn) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success');
+        }
+    }
+
+    function finishAndSubmitQuiz() {
+        if (!activeQuizSession) return;
+        clearInterval(quizTimerInterval);
+
+        const quiz = activeQuizSession.quiz;
+        let score = 0;
+        const answersDetail = [];
+
+        quiz.questions.forEach(q => {
+            const selected = activeQuizSession.answers[q.id] || null;
+            const isCorrect = (selected === q.correct);
+            if (isCorrect) score++;
+            answersDetail.push({
+                qId: q.id,
+                selected: selected,
+                correct: q.correct,
+                isCorrect: isCorrect
+            });
+        });
+
+        const total = quiz.questions.length;
+        const pct = Math.round((score / total) * 100);
+        const passed = pct >= quiz.passingPercentage;
+        const timeTakenSec = activeQuizSession.totalSeconds - activeQuizSession.remainingSeconds;
+        const timeSpentStr = `${Math.floor(timeTakenSec / 60)} min ${timeTakenSec % 60} sec`;
+
+        const newAttempt = {
+            id: Date.now(),
+            quizId: quiz.id,
+            quizTitle: quiz.title,
+            category: quiz.category,
+            participantId: 4,
+            participantName: "John Doe",
+            score: score,
+            totalScore: total,
+            percentage: pct,
+            passed: passed,
+            timeSpent: timeSpentStr,
+            date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            instructorFeedback: passed ? "Well done! Keep practicing advanced questions." : "Review the question explanations below to strengthen concepts.",
+            answers: answersDetail
+        };
+
+        DB.attempts.unshift(newAttempt);
+        saveDB(DB);
+
+        showFeedback(`Quiz completed! You scored ${score}/${total} (${pct}%).`);
+        viewAttemptReport(newAttempt.id);
+    }
+
+    function viewAttemptReport(attemptId) {
+        const attempt = DB.attempts.find(a => a.id === attemptId);
+        if (!attempt) return;
+
+        const quiz = DB.quizzes.find(q => q.id === attempt.quizId);
+
+        // Summary box
+        document.getElementById('report-summary-box').innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-secondary-subtle text-secondary mb-1">${attempt.category}</span>
+                    <h3 class="fw-bold mb-1">${attempt.quizTitle}</h3>
+                    <div class="text-muted small mb-2">Participant: <strong>${attempt.participantName}</strong> | Completed on: ${attempt.date} | Time: ${attempt.timeSpent}</div>
+                    <div class="alert alert-info py-2 small mb-0"><i class="bi bi-chat-quote-fill me-1"></i><strong>Instructor Feedback:</strong> ${attempt.instructorFeedback || 'Pending instructor review.'}</div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="badge fs-5 px-3 py-2 ${attempt.passed ? 'bg-success' : 'bg-danger'}">${attempt.passed ? 'PASSED' : 'FAILED'}</span>
+                    <div class="display-6 fw-bold mt-2 ${attempt.passed ? 'text-success' : 'text-danger'}">${attempt.percentage}%</div>
+                    <div class="small fw-semibold text-muted">${attempt.score} of ${attempt.totalScore} Points</div>
+                </div>
+            </div>
+        `;
+
+        // Detailed question review
+        const container = document.getElementById('report-questions-breakdown');
+        if (quiz) {
+            container.innerHTML = quiz.questions.map((q, idx) => {
+                const userAns = attempt.answers ? attempt.answers.find(a => a.qId === q.id) : null;
+                const isCorrect = userAns ? userAns.isCorrect : false;
+                const selectedOpt = userAns ? userAns.selected : 'None';
+
+                return `
+                    <div class="card card-custom p-4 ${isCorrect ? 'border-start border-4 border-success' : 'border-start border-4 border-danger'}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0">Question ${idx + 1}</h6>
+                            <span class="badge ${isCorrect ? 'bg-success' : 'bg-danger'}">${isCorrect ? 'CORRECT' : 'INCORRECT'}</span>
+                        </div>
+                        <p class="code-font fw-medium mb-3">${q.text}</p>
+                        <div class="row g-2 mb-3 small">
+                            ${['A', 'B', 'C', 'D'].map(opt => `
+                                <div class="col-md-6">
+                                    <div class="p-2 rounded border ${q.correct === opt ? 'border-success bg-success-subtle text-success fw-bold' : (selectedOpt === opt ? 'border-danger bg-danger-subtle text-danger fw-bold' : 'bg-light')}">
+                                        <strong>${opt}:</strong> ${q['option' + opt]}
+                                        ${q.correct === opt ? '<i class="bi bi-check-circle-fill text-success ms-1"></i>' : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="p-3 bg-light rounded small">
+                            <div><strong>Your Choice:</strong> Option ${selectedOpt || 'None'}</div>
+                            <div class="text-success"><strong>Correct Option:</strong> Option ${q.correct}</div>
+                            <div class="mt-1 text-muted"><i class="bi bi-lightbulb-fill text-warning me-1"></i><strong>Explanation:</strong> ${q.explanation}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        showSection('participant-report');
+    }
+
+    function renderParticipantHistory() {
+        const tbody = document.getElementById('participant-history-table');
+        tbody.innerHTML = DB.attempts.map(a => `
+            <tr>
+                <td class="fw-bold text-muted">#${a.id}</td>
+                <td><strong>${a.quizTitle}</strong></td>
+                <td><span class="badge bg-secondary-subtle text-secondary">${a.category}</span></td>
+                <td class="fw-bold ${a.passed ? 'text-success' : 'text-danger'}">${a.score}/${a.totalScore} (${a.percentage}%)</td>
+                <td><span class="badge ${a.passed ? 'bg-success' : 'bg-danger'}">${a.passed ? 'PASSED' : 'FAILED'}</span></td>
+                <td class="small text-muted">${a.date}</td>
+                <td class="small text-muted">${a.instructorFeedback || 'Pending'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewAttemptReport(${a.id})">Report</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function renderReminders() {
+        const tbody = document.getElementById('participant-reminders-table');
+        tbody.innerHTML = DB.reminders.map(r => `
+            <tr>
+                <td>
+                    <button class="btn btn-sm ${r.completed ? 'btn-success' : 'btn-outline-secondary'}" onclick="toggleReminder(${r.id})">
+                        <i class="bi bi-check2"></i> ${r.completed ? 'Done' : 'Pending'}
+                    </button>
+                </td>
+                <td class="fw-semibold ${r.completed ? 'text-decoration-line-through text-muted' : ''}">${r.quizTitle}</td>
+                <td class="text-primary"><i class="bi bi-calendar3 me-1"></i>${r.dateTime}</td>
+                <td class="text-muted small">${r.notes || 'None'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteReminder(${r.id})"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleReminder(id) {
+        const rem = DB.reminders.find(r => r.id === id);
+        if (rem) {
+            rem.completed = !rem.completed;
+            saveDB(DB);
+            renderReminders();
+            renderParticipantQuizzes();
+        }
+    }
+
+    function deleteReminder(id) {
+        DB.reminders = DB.reminders.filter(r => r.id !== id);
+        saveDB(DB);
+        renderReminders();
+        renderParticipantQuizzes();
+        showFeedback("Reminder deleted.");
+    }
+
+    function handleAddReminder(e) {
+        e.preventDefault();
+        const quiz = document.getElementById('new-reminder-quiz').value;
+        const dt = document.getElementById('new-reminder-dt').value;
+        const notes = document.getElementById('new-reminder-notes').value;
+
+        DB.reminders.push({
+            id: Date.now(),
+            quizTitle: quiz,
+            dateTime: dt.replace('T', ' '),
+            notes: notes,
+            completed: false
+        });
+        saveDB(DB);
+        bootstrap.Modal.getInstance(document.getElementById('modal-add-reminder')).hide();
+        showFeedback("Reminder successfully scheduled!");
+        renderReminders();
+        renderParticipantQuizzes();
+    }
+
+    function renderLeaderboard() {
+        const tbody = document.getElementById('leaderboard-table-body');
+        const rows = [
+            { rank: 1, name: "Alice Walker", email: "alice@student.com", completed: 2, points: 9, accuracy: 100 },
+            { rank: 2, name: "John Doe (You)", email: "participant@quizplatform.com", completed: 2, points: 8, accuracy: 80 },
+            { rank: 3, name: "Carol Danvers", email: "carol@student.com", completed: 1, points: 5, accuracy: 100 },
+            { rank: 4, name: "Bob Smith", email: "bob@student.com", completed: 1, points: 2, accuracy: 40 }
+        ];
+
+        tbody.innerHTML = rows.map(r => `
+            <tr class="${r.rank === 2 ? 'table-primary fw-semibold' : ''}">
+                <td>
+                    <span class="badge ${r.rank === 1 ? 'bg-warning text-dark' : (r.rank === 2 ? 'bg-secondary text-white' : (r.rank === 3 ? 'bg-danger text-white' : 'bg-light text-dark border'))} p-2 rounded-circle">
+                        ${r.rank}
+                    </span>
+                </td>
+                <td>
+                    <div>${r.name}</div>
+                    <div class="small text-muted">${r.email}</div>
+                </td>
+                <td><span class="badge bg-light text-dark border">${r.completed} quizzes</span></td>
+                <td class="text-primary fw-bold">${r.points} pts</td>
+                <td style="min-width: 150px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress flex-grow-1" style="height: 6px;">
+                            <div class="progress-bar ${r.accuracy >= 70 ? 'bg-success' : 'bg-danger'}" style="width: ${r.accuracy}%;"></div>
+                        </div>
+                        <span class="small">${r.accuracy}%</span>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function renderParticipantMessages() {
+        const container = document.getElementById('participant-messages-list');
+        container.innerHTML = DB.messages.map(m => `
+            <div class="card card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge ${m.status === 'REPLIED' ? 'bg-success' : 'bg-warning text-dark'}">${m.status}</span>
+                    <span class="small text-muted">${m.date} | Instructor: <strong>${m.recipient}</strong></span>
+                </div>
+                <h5 class="fw-bold">${m.subject}</h5>
+                <div class="p-3 bg-light rounded text-secondary mb-3">${m.message}</div>
+                ${m.reply ? `
+                    <div class="p-3 border-start border-4 border-success bg-success-subtle rounded">
+                        <div class="small fw-bold text-success mb-1"><i class="bi bi-reply-fill"></i> Instructor Reply:</div>
+                        <div>${m.reply}</div>
+                    </div>
+                ` : '<div class="small text-muted fst-italic">Awaiting instructor reply...</div>'}
+            </div>
+        `).join('');
+    }
+
+    function handleSendMessage(e) {
+        e.preventDefault();
+        const sub = document.getElementById('msg-subject').value;
+        const body = document.getElementById('msg-body').value;
+
+        DB.messages.unshift({
+            id: Date.now(),
+            subject: sub,
+            message: body,
+            reply: null,
+            sender: "John Doe",
+            recipient: "Prof. Alan Gosling",
+            status: "OPEN",
+            date: new Date().toISOString().replace('T', ' ').substring(0, 16)
+        });
+        saveDB(DB);
+        bootstrap.Modal.getInstance(document.getElementById('modal-send-message')).hide();
+        showFeedback("Your inquiry has been sent to the Quiz Creator!");
+        renderParticipantMessages();
+    }
+
+
+    // --- QUIZ CREATOR FUNCTIONS ---
+    let questionInputIndex = 0;
+    function addQuestionInputBlock() {
+        questionInputIndex++;
+        const container = document.getElementById('creator-questions-builder-container');
+        const div = document.createElement('div');
+        div.className = 'card card-custom p-4 question-block';
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark">Question #${questionInputIndex}</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.question-block').remove()"><i class="bi bi-trash"></i></button>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Question Prompt</label>
+                <textarea class="form-control code-font q-text" rows="2" placeholder="e.g. What is the contract between equals() and hashCode()?" required></textarea>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6"><input type="text" class="form-control q-optA" placeholder="Option A" required></div>
+                <div class="col-md-6"><input type="text" class="form-control q-optB" placeholder="Option B" required></div>
+                <div class="col-md-6"><input type="text" class="form-control q-optC" placeholder="Option C" required></div>
+                <div class="col-md-6"><input type="text" class="form-control q-optD" placeholder="Option D" required></div>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-success">Correct Answer</label>
+                    <select class="form-select q-correct">
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label small fw-semibold">Explanation</label>
+                    <input type="text" class="form-control q-exp" placeholder="Why this option is correct...">
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function renderCreatorQuizzes() {
+        const table = document.getElementById('creator-dashboard-quizzes-table');
+        const historyTable = document.getElementById('creator-history-table');
+
+        const html = DB.quizzes.map(q => `
+            <tr>
+                <td class="fw-bold text-muted">${q.id}</td>
+                <td><strong>${q.title}</strong></td>
+                <td><span class="badge bg-secondary-subtle text-secondary">${q.category}</span></td>
+                <td>${q.duration} min</td>
+                <td>${q.passingPercentage}%</td>
+                <td><span class="badge bg-light text-dark border">${q.questions.length} questions</span></td>
+                <td>
+                    <span class="badge ${q.status === 'APPROVED' ? 'bg-success' : (q.status === 'PENDING_APPROVAL' ? 'bg-warning text-dark' : 'bg-danger')}">
+                        ${q.status}
+                    </span>
+                </td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteQuiz(${q.id})"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+
+        if (table) table.innerHTML = html;
+        if (historyTable) historyTable.innerHTML = html;
+    }
+
+    function handleCreateQuiz(e) {
+        e.preventDefault();
+        const title = document.getElementById('new-quiz-title').value;
+        const cat = document.getElementById('new-quiz-category').value;
+        const desc = document.getElementById('new-quiz-desc').value;
+        const duration = parseInt(document.getElementById('new-quiz-duration').value);
+        const pass = parseInt(document.getElementById('new-quiz-pass').value);
+
+        const blocks = document.querySelectorAll('.question-block');
+        if (blocks.length === 0) {
+            alert('Please add at least one question to the quiz.');
+            return;
+        }
+
+        const questions = [];
+        blocks.forEach((blk, idx) => {
+            questions.push({
+                id: Date.now() + idx,
+                text: blk.querySelector('.q-text').value,
+                optionA: blk.querySelector('.q-optA').value,
+                optionB: blk.querySelector('.q-optB').value,
+                optionC: blk.querySelector('.q-optC').value,
+                optionD: blk.querySelector('.q-optD').value,
+                correct: blk.querySelector('.q-correct').value,
+                explanation: blk.querySelector('.q-exp').value || 'Standard Java specification.'
+            });
+        });
+
+        DB.quizzes.push({
+            id: Date.now(),
+            title: title,
+            category: cat,
+            duration: duration,
+            passingPercentage: pass,
+            status: "PENDING_APPROVAL",
+            creator: "Prof. Alan Gosling",
+            questions: questions
+        });
+
+        saveDB(DB);
+        showFeedback(`Quiz "${title}" created and submitted for Admin approval!`);
+        showSection('creator-history');
+    }
+
+    function deleteQuiz(id) {
+        if (!confirm('Are you sure you want to delete this quiz?')) return;
+        DB.quizzes = DB.quizzes.filter(q => q.id !== id);
+        saveDB(DB);
+        showFeedback("Quiz deleted.");
+        renderCreatorQuizzes();
+        renderAdminQuizzes();
+    }
+
+    function renderCreatorSubmissions() {
+        const tbody = document.getElementById('creator-submissions-table');
+        tbody.innerHTML = DB.attempts.map(a => `
+            <tr>
+                <td class="fw-bold">#${a.id}</td>
+                <td><strong>${a.participantName}</strong></td>
+                <td>${a.quizTitle}</td>
+                <td class="fw-bold ${a.passed ? 'text-success' : 'text-danger'}">${a.score}/${a.totalScore} (${a.percentage}%)</td>
+                <td><span class="badge ${a.passed ? 'bg-success' : 'bg-danger'}">${a.passed ? 'PASSED' : 'FAILED'}</span></td>
+                <td>${a.instructorFeedback || 'None yet'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary" onclick="openFeedbackModal(${a.id}, '${a.participantName}', '${a.instructorFeedback || ''}')">
+                        <i class="bi bi-pencil-square me-1"></i> Give Feedback
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openFeedbackModal(attId, studentName, feedback) {
+        document.getElementById('feedback-attempt-id').value = attId;
+        document.getElementById('feedback-student-info').innerText = `Evaluation for ${studentName}`;
+        document.getElementById('feedback-text').value = feedback;
+        new bootstrap.Modal(document.getElementById('modal-feedback')).show();
+    }
+
+    function handleSaveFeedback(e) {
+        e.preventDefault();
+        const attId = parseInt(document.getElementById('feedback-attempt-id').value);
+        const fb = document.getElementById('feedback-text').value;
+        const att = DB.attempts.find(a => a.id === attId);
+        if (att) {
+            att.instructorFeedback = fb;
+            saveDB(DB);
+            bootstrap.Modal.getInstance(document.getElementById('modal-feedback')).hide();
+            showFeedback("Instructor feedback saved for participant!");
+            renderCreatorSubmissions();
+        }
+    }
+
+    function renderCreatorMessages() {
+        const container = document.getElementById('creator-messages-list');
+        container.innerHTML = DB.messages.map(m => `
+            <div class="card card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge ${m.status === 'REPLIED' ? 'bg-success' : 'bg-danger'}">${m.status}</span>
+                    <span class="small text-muted">From: <strong>${m.sender}</strong> (${m.date})</span>
+                </div>
+                <h5 class="fw-bold">${m.subject}</h5>
+                <div class="p-3 bg-light rounded text-secondary mb-3">${m.message}</div>
+                ${m.reply ? `
+                    <div class="p-3 bg-info-subtle border-start border-4 border-info rounded mb-3">
+                        <div class="small fw-bold text-info"><i class="bi bi-reply-fill"></i> Your Reply:</div>
+                        <div>${m.reply}</div>
+                    </div>
+                ` : ''}
+                <div class="input-group">
+                    <input type="text" class="form-control" id="reply-input-${m.id}" placeholder="Type reply to ${m.sender}..." value="${m.reply || ''}">
+                    <button class="btn btn-primary" onclick="sendCreatorReply(${m.id})">Send Reply</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function sendCreatorReply(msgId) {
+        const text = document.getElementById('reply-input-' + msgId).value;
+        const msg = DB.messages.find(m => m.id === msgId);
+        if (msg) {
+            msg.reply = text;
+            msg.status = "REPLIED";
+            saveDB(DB);
+            showFeedback("Reply transmitted to participant!");
+            renderCreatorMessages();
+        }
+    }
+
+
+    // --- ADMIN FUNCTIONS ---
+    function renderAdminQuizzes() {
+        const tbody = document.getElementById('admin-quizzes-table');
+        const pendingTbody = document.getElementById('admin-dashboard-pending-table');
+
+        const html = DB.quizzes.map(q => `
+            <tr>
+                <td class="fw-bold text-muted">${q.id}</td>
+                <td><strong>${q.title}</strong></td>
+                <td>${q.creator}</td>
+                <td>${q.duration} min</td>
+                <td>${q.passingPercentage}%</td>
+                <td>
+                    <span class="badge ${q.status === 'APPROVED' ? 'bg-success' : (q.status === 'PENDING_APPROVAL' ? 'bg-warning text-dark' : 'bg-danger')}">
+                        ${q.status}
+                    </span>
+                </td>
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-success" onclick="adminApproveQuiz(${q.id})" ${q.status === 'APPROVED' ? 'disabled' : ''}>
+                            <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="adminRejectQuiz(${q.id})" ${q.status === 'REJECTED' ? 'disabled' : ''}>
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        if (tbody) tbody.innerHTML = html;
+
+        // Pending approvals table on admin dashboard
+        if (pendingTbody) {
+            const pending = DB.quizzes.filter(q => q.status === 'PENDING_APPROVAL');
+            document.getElementById('admin-dash-pending-quizzes').innerText = pending.length;
+            pendingTbody.innerHTML = pending.length === 0 ? '<tr><td colspan="4" class="text-muted text-center">No quizzes awaiting approval.</td></tr>' :
+                pending.map(q => `
+                    <tr>
+                        <td><strong>${q.title}</strong></td>
+                        <td><span class="badge bg-secondary-subtle text-secondary">${q.category}</span></td>
+                        <td>${q.creator}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-success" onclick="adminApproveQuiz(${q.id})">Approve</button>
+                        </td>
+                    </tr>
+                `).join('');
+        }
+    }
+
+    function adminApproveQuiz(id) {
+        const q = DB.quizzes.find(item => item.id === id);
+        if (q) {
+            q.status = 'APPROVED';
+            saveDB(DB);
+            showFeedback(`Quiz "${q.title}" approved and published to participants!`);
+            renderAdminQuizzes();
+            renderParticipantQuizzes();
+        }
+    }
+
+    function adminRejectQuiz(id) {
+        const q = DB.quizzes.find(item => item.id === id);
+        if (q) {
+            q.status = 'REJECTED';
+            saveDB(DB);
+            showFeedback(`Quiz "${q.title}" marked as rejected.`);
+            renderAdminQuizzes();
+        }
+    }
+
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-users-table');
+        const preview = document.getElementById('admin-dashboard-users-preview');
+
+        tbody.innerHTML = DB.users.map(u => `
+            <tr>
+                <td class="fw-bold text-muted">${u.id}</td>
+                <td><strong>${u.name}</strong></td>
+                <td>${u.email}</td>
+                <td><span class="badge ${u.role === 'ROLE_ADMIN' ? 'bg-danger' : (u.role === 'ROLE_CREATOR' ? 'bg-info text-dark' : 'bg-success')}">${u.role.replace('ROLE_', '')}</span></td>
+                <td><span class="badge ${u.enabled ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">${u.enabled ? 'Active' : 'Disabled'}</span></td>
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-warning" onclick="toggleUserStatus(${u.id})"><i class="bi ${u.enabled ? 'bi-lock' : 'bi-unlock'}"></i></button>
+                        <button class="btn btn-outline-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        if (preview) {
+            preview.innerHTML = DB.users.slice(0, 5).map(u => `
+                <tr>
+                    <td><strong>${u.name}</strong></td>
+                    <td><span class="badge ${u.role === 'ROLE_ADMIN' ? 'bg-danger' : 'bg-info text-dark'}">${u.role.replace('ROLE_', '')}</span></td>
+                    <td><span class="badge ${u.enabled ? 'bg-success' : 'bg-secondary'}">${u.enabled ? 'Active' : 'Disabled'}</span></td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    function toggleUserStatus(id) {
+        const u = DB.users.find(item => item.id === id);
+        if (u) {
+            u.enabled = !u.enabled;
+            saveDB(DB);
+            showFeedback(`User ${u.name} status updated.`);
+            renderAdminUsers();
+        }
+    }
+
+    function deleteUser(id) {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+        DB.users = DB.users.filter(u => u.id !== id);
+        saveDB(DB);
+        showFeedback("User account removed.");
+        renderAdminUsers();
+    }
+
+    function handleAddUser(e) {
+        e.preventDefault();
+        const name = document.getElementById('new-user-name').value;
+        const email = document.getElementById('new-user-email').value;
+        const role = document.getElementById('new-user-role').value;
+
+        DB.users.push({
+            id: Date.now(),
+            name: name,
+            email: email,
+            role: role,
+            enabled: true
+        });
+        saveDB(DB);
+        bootstrap.Modal.getInstance(document.getElementById('modal-add-user')).hide();
+        showFeedback(`User account ${name} created!`);
+        renderAdminUsers();
+    }
+
+    function renderAdminAlerts() {
+        const tbody = document.getElementById('admin-alerts-table');
+        tbody.innerHTML = DB.alerts.map(a => `
+            <tr>
+                <td><strong>${a.title}</strong></td>
+                <td class="text-muted small">${a.message}</td>
+                <td><span class="badge ${a.severity === 'CRITICAL' ? 'bg-danger' : (a.severity === 'WARNING' ? 'bg-warning text-dark' : 'bg-info text-dark')}">${a.severity}</span></td>
+                <td><span class="badge ${a.active ? 'bg-success' : 'bg-secondary'}">${a.active ? 'Broadcasting' : 'Inactive'}</span></td>
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" onclick="toggleAlert(${a.id})"><i class="bi bi-pause"></i></button>
+                        <button class="btn btn-outline-danger" onclick="deleteAlert(${a.id})"><i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleAlert(id) {
+        const a = DB.alerts.find(item => item.id === id);
+        if (a) {
+            a.active = !a.active;
+            saveDB(DB);
+            renderAdminAlerts();
+            updateGlobalAlertBanner();
+        }
+    }
+
+    function deleteAlert(id) {
+        DB.alerts = DB.alerts.filter(a => a.id !== id);
+        saveDB(DB);
+        renderAdminAlerts();
+        updateGlobalAlertBanner();
+        showFeedback("Alert deleted.");
+    }
+
+    function handleAddAlert(e) {
+        e.preventDefault();
+        const t = document.getElementById('new-alert-title').value;
+        const m = document.getElementById('new-alert-msg').value;
+        const s = document.getElementById('new-alert-sev').value;
+
+        DB.alerts.unshift({ id: Date.now(), title: t, message: m, severity: s, active: true });
+        saveDB(DB);
+        bootstrap.Modal.getInstance(document.getElementById('modal-add-alert')).hide();
+        showFeedback("New alert broadcasted!");
+        renderAdminAlerts();
+        updateGlobalAlertBanner();
+    }
+
+    function updateGlobalAlertBanner() {
+        const active = DB.alerts.find(a => a.active);
+        const banner = document.getElementById('system-alert-banner');
+        if (active && banner) {
+            document.getElementById('system-alert-title').innerText = active.title;
+            document.getElementById('system-alert-msg').innerText = active.message;
+            banner.classList.remove('d-none');
+        } else if (banner) {
+            banner.classList.add('d-none');
+        }
+    }
+
+    function handleSaveSettings(e) {
+        e.preventDefault();
+        showFeedback("System settings successfully updated.");
+    }
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', () => {
+        addQuestionInputBlock(); // Pre-add one question in creator
+        updateGlobalAlertBanner();
+        showSection('participant-dashboard');
+    });
+</script>
+</body>
+</html>
